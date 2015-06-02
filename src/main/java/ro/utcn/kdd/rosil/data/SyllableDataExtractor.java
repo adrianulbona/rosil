@@ -4,10 +4,11 @@ import java.util.*;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.Collections.synchronizedCollection;
 
 public class SyllableDataExtractor {
 
-    public static final List<Integer> DEFAULT_BORDERS = Arrays.<Integer>asList(-2, -1, 0, 1, 2, 3, 4, 5);
+    public static final List<Integer> DEFAULT_BORDERS = Arrays.<Integer>asList(-2, -1, 0, 1, 2, 3);
 
     public List<PotentialSyllable> extractFrom(Word word, List<Integer> borders) {
         final String wordAsString = word.toString().toLowerCase();
@@ -39,8 +40,9 @@ public class SyllableDataExtractor {
         return substring.toString();
     }
 
-    public Set<PotentialSyllable> extractFrom(List<Word> words, List<Integer> borders) {
-        final Set<PotentialSyllable> potentialSyllables = Collections.synchronizedSet(new TreeSet<>());
+    public Collection<PotentialSyllable> extractFrom(List<Word> words, List<Integer> borders, boolean restrictToSet) {
+        final Collection<PotentialSyllable> baseCollection = restrictToSet ? new HashSet<>() : new LinkedList<>();
+        final Collection<PotentialSyllable> potentialSyllables = synchronizedCollection(baseCollection);
         words.parallelStream().forEach(word -> potentialSyllables.addAll(extractFrom(word, borders)));
         return potentialSyllables;
     }

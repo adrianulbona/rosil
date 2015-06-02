@@ -6,8 +6,8 @@ import ro.utcn.kdd.rosil.data.PotentialSyllable;
 import ro.utcn.kdd.rosil.data.SyllableDataExtractor;
 import ro.utcn.kdd.rosil.data.Word;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -34,7 +34,7 @@ public class SyllableDataExtractorTest {
     @Test
     public void testExtractFromWords() {
         final List<Word> words = asList(ALAMBICAT, EVENTUAL);
-        final Set<PotentialSyllable> potentialSyllables = syllableDataExtractor.extractFrom(words, DEFAULT_BORDERS);
+        final Collection<PotentialSyllable> potentialSyllables = syllableDataExtractor.extractFrom(words, DEFAULT_BORDERS, true);
         assertEquals(EVENTUAL.toString().length() + ALAMBICAT.toString().length(), potentialSyllables.size());
     }
 

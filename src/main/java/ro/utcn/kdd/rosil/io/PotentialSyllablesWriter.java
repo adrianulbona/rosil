@@ -5,6 +5,7 @@ import ro.utcn.kdd.rosil.data.PotentialSyllable;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,10 +20,14 @@ public class PotentialSyllablesWriter {
     public void write(Collection<PotentialSyllable> potentialSyllables, List<Integer> bounds, Path path)
             throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-            final CSVWriter csvWriter = new CSVWriter(writer, '\t', CSVWriter.NO_QUOTE_CHARACTER);
-            csvWriter.writeNext(computeHeader(bounds));
-            potentialSyllables.forEach(potentialSyllable -> csvWriter.writeNext(potentialSyllable.toStringArray()));
+            write(potentialSyllables, bounds, writer);
         }
+    }
+
+    public void write(Collection<PotentialSyllable> potentialSyllables, List<Integer> bounds, Writer writer) {
+        final CSVWriter csvWriter = new CSVWriter(writer, '\t', CSVWriter.NO_QUOTE_CHARACTER);
+        csvWriter.writeNext(computeHeader(bounds));
+        potentialSyllables.forEach(potentialSyllable -> csvWriter.writeNext(potentialSyllable.toStringArray()));
     }
 
     public String[] computeHeader(List<Integer> bounds) {
