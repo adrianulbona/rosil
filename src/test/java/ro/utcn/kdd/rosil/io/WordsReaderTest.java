@@ -1,16 +1,18 @@
 package ro.utcn.kdd.rosil.io;
 
 import org.junit.Test;
+import ro.utcn.kdd.rosil.data.Word;
 
 import java.nio.file.Paths;
+import java.util.List;
 
-/**
- * Created by adibo on 5/7/2015.
- */
+import static org.junit.Assert.assertEquals;
+
 public class WordsReaderTest {
 
     @Test
     public void testRead() throws Exception {
-        new WordsReader().read(Paths.get("data/RoSyllabiDict.txt"));
+        final List<Word> words = new WordsReader().read(Paths.get("data/words_all.txt"));
+        assertEquals(525486, words.size());
     }
 }
