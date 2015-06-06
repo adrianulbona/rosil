@@ -1,7 +1,9 @@
 package ro.utcn.kdd.rosil.bide;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -19,41 +21,56 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.join;
 
 public class SilBIDE {
     protected static final Logger logger = LoggerFactory.getLogger(SilBIDE.class);
 
     public static void main(String[] args) throws Exception {
-        final int minSupport = 100;
+        final int minSupport = 10;
         final List<Pattern> patterns = loadPatternsFor(minSupport);
-        logger.info("tralala");
-//        logger.error();
+        final Map<String, Pattern> indexedPatterns = indexPatterns(patterns);
 
 
-/*
-        Multimap<String, List<String>> index = HashMultimap.<String, List<String>>create();
-        patterns.keySet().forEach(p -> index.put(p.get(0), p));
-        //index.keySet().forEach(e -> System.out.println(e + "->" + index.get(e).size()));
-        final Map<String, List<String>> stringifiedPatterns = new HashMap<>();
-        patterns.entrySet().forEach(x -> stringifiedPatterns.put(StringUtils.join(x.getKey().toArray()), x.getKey()));
+        splitWord(indexedPatterns, "elicopter");
+        splitWord(indexedPatterns, "mașina");
+        splitWord(indexedPatterns, "inginer");
+        splitWord(indexedPatterns, "aglutinare");
+        splitWord(indexedPatterns, "usturoi");
+        splitWord(indexedPatterns, "castravete");
+        splitWord(indexedPatterns, "împărat");
+        splitWord(indexedPatterns, "gunoier");
+        splitWord(indexedPatterns, "moșneag");
+    }
 
+    private static void splitWord(Map<String, Pattern> indexedPatterns, String word) {
+        final Multimap<Integer, Pattern> matchedPatterns = LinkedListMultimap.create();
+        for (int startIndex = 0; startIndex < word.length() - 1; startIndex++) {
+            for (int endIndex = startIndex + 1; endIndex <= word.length(); endIndex++) {
+                final String substring = word.substring(startIndex, endIndex);
+                final Pattern pattern = indexedPatterns.get(substring);
+                if (pattern != null && pattern.elements.size() > 1) {
+                    matchedPatterns.put(startIndex, pattern);
+                }
+            }
+        }
+        logger.info(matchedPatterns.toString());
+    }
 
-        splitWord(stringifiedPatterns, "maşină");
-        splitWord(stringifiedPatterns, "inginer");
-        splitWord(stringifiedPatterns, "aglutinare");
-        splitWord(stringifiedPatterns, "usturoi");
-        splitWord(stringifiedPatterns, "castravete");
-        splitWord(stringifiedPatterns, "împărat");
-        splitWord(stringifiedPatterns, "gunoier");
-        splitWord(stringifiedPatterns, "moşneag");
-*/
+    private static Map<String, Pattern> indexPatterns(List<Pattern> patterns) {
+        final Map<String, Pattern> indexedPatterns = new HashMap<>();
+        patterns.forEach(pattern -> indexedPatterns.put(join(pattern.elements.toArray()), pattern));
+        return indexedPatterns;
     }
 
     private static List<Pattern> loadPatternsFor(int minSupport) throws Exception {
-        final Path patternsPath = Paths.get(String.format("data/patterns_%s.json", minSupport));
+        final Path patternsPath = Paths.get(format("data/patterns_%s.json", minSupport));
         if (!Files.exists(patternsPath)) {
             computeAndCachePatterns(minSupport, patternsPath);
         }
@@ -63,14 +80,15 @@ public class SilBIDE {
 
     private static List<Pattern> getFromFile(Path patternsPath) throws IOException {
         try (final BufferedReader reader = Files.newBufferedReader(patternsPath, Charsets.UTF_8)) {
-            Type listType = new TypeToken<List<Pattern>>() {}.getType();
+            Type listType = new TypeToken<List<Pattern>>() {
+            }.getType();
             return new Gson().fromJson(reader, listType);
         }
     }
 
     private static void computeAndCachePatterns(int minSupport, Path patternsPath) throws Exception {
         final List<Word> words = new WordsReader().read(Paths.get("data/words_all.txt"));
-        logger.info(String.format("Loaded %s words...", words.size()));
+        logger.info(format("Loaded %s words...", words.size()));
         final SequenceDatabase<String> sdb = createSequenceDatabase(words);
         logger.info("Created sequence database...");
         sdb.setMiningStrategy(new ConcurrentBIDE<>());
@@ -96,21 +114,9 @@ public class SilBIDE {
         }
     }
 
-    private static void splitWord(Map<String, List<String>> stringifiedPatterns, String word) {
-        for (int i = word.length(); i > 0; i--) {
-            final List<String> potentialPattern = stringifiedPatterns.get(word.substring(0, i));
-            if (potentialPattern != null) {
-                final String firstSyllable = potentialPattern.get(0);
-                System.out.println(firstSyllable);
-                word = word.substring(firstSyllable.length(), word.length());
-                i = word.length();
-            }
-        }
-    }
-
     private static Map<List<String>, Integer> mine(SequenceDatabase<String> sdb, int support) throws Exception {
         final Map<List<String>, Integer> patterns = sdb.mineFrequentClosedSequences(support);
-        logger.info(String.format("Found %s patterns.", patterns.size()));
+        logger.info(format("Found %s patterns.", patterns.size()));
         return patterns;
     }
 
@@ -121,6 +127,11 @@ public class SilBIDE {
         public Pattern(List<String> elements, int support) {
             this.elements = elements;
             this.support = support;
+        }
+
+        @Override
+        public String toString() {
+            return format("%s(%s)", elements, support);
         }
     }
 }
