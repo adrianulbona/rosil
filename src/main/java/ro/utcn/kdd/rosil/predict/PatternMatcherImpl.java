@@ -12,11 +12,9 @@ import static org.apache.commons.lang3.StringUtils.join;
 
 public class PatternMatcherImpl implements PatternMatcher {
 
-    private final List<Pattern> patterns;
     private final Map<String, Pattern> indexedPatterns;
 
     public PatternMatcherImpl(List<Pattern> patterns) {
-        this.patterns = patterns;
         this.indexedPatterns = indexPatterns(patterns);
     }
 
@@ -33,7 +31,7 @@ public class PatternMatcherImpl implements PatternMatcher {
             for (int endIndex = startIndex + 1; endIndex <= word.length(); endIndex++) {
                 final String substring = word.substring(startIndex, endIndex);
                 final Pattern pattern = indexedPatterns.get(substring);
-                if (pattern != null && pattern.elements.size() > 1) {
+                if (pattern != null) {
                     matchedPatterns.add(new MatchedPattern(pattern, startIndex, endIndex));
                 }
             }

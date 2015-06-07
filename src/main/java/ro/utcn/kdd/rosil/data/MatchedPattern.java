@@ -3,8 +3,6 @@ package ro.utcn.kdd.rosil.data;
 import com.google.common.collect.Range;
 
 import static com.google.common.collect.Range.closedOpen;
-import static ro.utcn.kdd.rosil.data.MatchedPattern.ExtensionType.AFTER;
-import static ro.utcn.kdd.rosil.data.MatchedPattern.ExtensionType.BEFORE;
 
 public class MatchedPattern {
 
@@ -18,24 +16,20 @@ public class MatchedPattern {
         this.endIndex = endIndex;
     }
 
-    public boolean isExtendableBeforeWith(MatchedPattern possibleExtension) {
-        return isExtendableWith(possibleExtension, BEFORE);
-
-    }
-
     public boolean isExtendableAfterWith(MatchedPattern possibleExtension) {
-        return isExtendableWith(possibleExtension, AFTER);
-
-    }
-
-    private boolean isExtendableWith(MatchedPattern possibleExtension, ExtensionType extensionType) {
-        if (!this.getRange().isConnected(possibleExtension.getRange())) {
+        final Range<Integer> possibleExtensionRange = possibleExtension.getRange();
+        final Range<Integer> range = this.getRange();
+        if (!range.isConnected(possibleExtensionRange)
+                || range.encloses(possibleExtensionRange)
+                || possibleExtensionRange.encloses(range)) {
             return false;
         }
 
-        final Range<Integer> intersection = this.getRange().intersection(possibleExtension.getRange());
-        int splitPointToMatch = extensionType == BEFORE ? intersection.lowerEndpoint() : intersection.upperEndpoint();
-        return intersection.isEmpty() || possibleExtension.hasSplitPointAt(splitPointToMatch);
+        final Range<Integer> intersection = range.intersection(possibleExtensionRange);
+        if (intersection.isEmpty()) {
+            return range.upperEndpoint() <= intersection.lowerEndpoint();
+        }
+        return possibleExtension.hasSplitPointAt(intersection.upperEndpoint());
     }
 
     private boolean hasSplitPointAt(int possibleSplitPoint) {
@@ -51,12 +45,12 @@ public class MatchedPattern {
         return false;
     }
 
-    private Range<Integer> getRange() {
+    public Range<Integer> getRange() {
         return closedOpen(this.startIndex, this.endIndex);
     }
 
-    public enum ExtensionType {
-        BEFORE,
-        AFTER
+    @Override
+    public String toString() {
+        return pattern + "->" + getRange();
     }
 }

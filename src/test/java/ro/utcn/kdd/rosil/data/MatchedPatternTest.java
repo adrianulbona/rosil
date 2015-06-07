@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MatchedPatternTest {
 
-    @Test
+/*    @Test
     public void testIsExtendableBeforeWithTrue() throws Exception {
         final MatchedPattern pattern = new MatchedPattern(new Pattern(Arrays.<String>asList("li", "co"), -1), 1, 5);
 
@@ -46,7 +46,7 @@ public class MatchedPatternTest {
         final Pattern pattern3 = new Pattern(Arrays.<String>asList("el", "li"), -1);
         final MatchedPattern extension3 = new MatchedPattern(pattern3, 0, 5);
         assertFalse(pattern.isExtendableBeforeWith(extension3));
-    }
+    }*/
 
     @Test
     public void testIsExtendableAfterWithTrue() throws Exception {

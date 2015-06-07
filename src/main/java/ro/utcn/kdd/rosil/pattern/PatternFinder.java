@@ -21,13 +21,15 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.nio.file.Paths.get;
+import static java.util.stream.Collectors.toList;
 
 public class PatternFinder {
 
@@ -67,8 +69,8 @@ public class PatternFinder {
         LOGGER.info("Created sequence database...");
         sdb.setMiningStrategy(new ConcurrentBIDE<>());
         final Map<List<String>, Integer> rawPatterns = mine(sdb, minSupport);
-        final List<Pattern> patterns = new LinkedList<>();
-        rawPatterns.entrySet().forEach(p -> patterns.add(new Pattern(p.getKey(), p.getValue())));
+        final Stream<Map.Entry<List<String>, Integer>> patternsStream = rawPatterns.entrySet().parallelStream();
+        final List<Pattern> patterns = patternsStream.map(p -> new Pattern(p.getKey(), p.getValue())).collect(toList());
         writePatterns(patternsPath, patterns);
     }
 
@@ -89,14 +91,14 @@ public class PatternFinder {
     }
 
     private Map<List<String>, Integer> mine(SequenceDatabase<String> sdb, int support) {
-        final Map<List<String>, Integer> rawPatterns = new HashMap<>();
         try {
-            rawPatterns.putAll(sdb.mineFrequentClosedSequences(support));
+            final Map<List<String>, Integer> rawPatterns = sdb.mineFrequentClosedSequences(support);
             LOGGER.info(format("Found %s patterns.", rawPatterns.size()));
+            return rawPatterns;
         } catch (Exception e) {
             LOGGER.error("Exception occurred while mining patterns.", e);
         }
-        return rawPatterns;
+        return Collections.emptyMap();
     }
 
 }
