@@ -3,13 +3,13 @@ package ro.utcn.kdd.rosil;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.utcn.kdd.rosil.match.MatchedPattern;
-import ro.utcn.kdd.rosil.pattern.Pattern;
 import ro.utcn.kdd.rosil.io.PatternGraphViewer;
-import ro.utcn.kdd.rosil.pattern.PatternFinder;
-import ro.utcn.kdd.rosil.predict.PatternGraphBuilder;
+import ro.utcn.kdd.rosil.match.MatchedPattern;
 import ro.utcn.kdd.rosil.match.PatternMatcher;
 import ro.utcn.kdd.rosil.match.PatternMatcherImpl;
+import ro.utcn.kdd.rosil.pattern.Pattern;
+import ro.utcn.kdd.rosil.pattern.PatternFinder;
+import ro.utcn.kdd.rosil.predict.PatternGraphBuilder;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -37,7 +37,7 @@ public class SilBIDE {
         final PatternMatcher matcher = new PatternMatcherImpl(patterns);
         final PatternGraphBuilder patternGraphBuilder = new PatternGraphBuilder();
         final List<MatchedPattern> matchedPatterns = matcher.match(word);
-        final DirectedGraph<MatchedPattern, String> patternGraph = patternGraphBuilder.build(matchedPatterns, word.length());
+        final DirectedGraph<MatchedPattern, String> patternGraph = patternGraphBuilder.build(matchedPatterns);
         new PatternGraphViewer().showGraphAndWait(patternGraph);
     }
 }

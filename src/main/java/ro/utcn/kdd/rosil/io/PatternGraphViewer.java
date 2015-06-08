@@ -43,7 +43,7 @@ public class PatternGraphViewer<V extends MatchedPattern, E> {
     private JFrame createFrame(DirectedGraph<V, E> patternGraph) {
         final JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(1200, 800);
         final JGraphXAdapter<V, E> adapter = createAdapter(patternGraph);
         patternGraph.vertexSet().stream().filter(node -> node.type == MatchedPattern.Type.BEGIN).forEach(node -> {
             adapter.setCellStyles(mxConstants.STYLE_FILLCOLOR, "A9A9A9", new Object[]{adapter.getVertexToCellMap().get(node)});
