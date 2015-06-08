@@ -3,6 +3,8 @@ package ro.utcn.kdd.rosil.match;
 import com.google.common.collect.Range;
 import ro.utcn.kdd.rosil.pattern.Pattern;
 
+import java.util.*;
+
 public class MatchedPattern {
 
     public final Pattern pattern;
@@ -51,6 +53,23 @@ public class MatchedPattern {
     @Override
     public String toString() {
         return pattern + "->" + this.range;
+    }
+
+    public List<String> getElementsForRange(Range<Integer> range) {
+        int index = this.range.lowerEndpoint();
+        final Map<Range, String> rangesForElements = new LinkedHashMap<>();
+        for(String element : this.pattern.elements) {
+            final int length = element.length();
+            rangesForElements.put(Range.closedOpen(index, index + length), element);
+            index+= length;
+        }
+        final List<String> elements = new LinkedList<>();
+        for (Range rangeForElement : rangesForElements.keySet()) {
+            if (range.encloses(rangeForElement)) {
+                elements.add(rangesForElements.get(rangeForElement));
+            }
+        }
+        return elements;
     }
 
     public enum Type {
