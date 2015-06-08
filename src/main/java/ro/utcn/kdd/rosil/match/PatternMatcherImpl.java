@@ -1,7 +1,7 @@
-package ro.utcn.kdd.rosil.predict;
+package ro.utcn.kdd.rosil.match;
 
-import ro.utcn.kdd.rosil.data.MatchedPattern;
-import ro.utcn.kdd.rosil.data.Pattern;
+import com.google.common.collect.Range;
+import ro.utcn.kdd.rosil.pattern.Pattern;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,10 +32,27 @@ public class PatternMatcherImpl implements PatternMatcher {
                 final String substring = word.substring(startIndex, endIndex);
                 final Pattern pattern = indexedPatterns.get(substring);
                 if (pattern != null) {
-                    matchedPatterns.add(new MatchedPattern(pattern, startIndex, endIndex));
+                    final Range range = Range.closedOpen(startIndex, endIndex);
+                    final MatchedPattern.Type patternType = findType(range, word.length());
+                    matchedPatterns.add(new MatchedPattern(pattern, range, patternType));
                 }
             }
         }
         return matchedPatterns;
+    }
+
+    private MatchedPattern.Type findType(Range<Integer> range, int wordLength) {
+        final boolean isBegin = range.lowerEndpoint() == 0;
+        final boolean isEnd = range.upperEndpoint() == wordLength;
+        if (isBegin && isEnd) {
+            return MatchedPattern.Type.COMPLETE;
+        }
+        if (isBegin) {
+            return MatchedPattern.Type.BEGIN;
+        }
+        if (isEnd) {
+            return MatchedPattern.Type.END;
+        }
+        return MatchedPattern.Type.INTERMEDIARY;
     }
 }

@@ -1,7 +1,6 @@
 package ro.utcn.kdd.rosil.io;
 
 import org.junit.Test;
-import ro.utcn.kdd.rosil.data.Word;
 
 import java.nio.file.Paths;
 import java.util.List;

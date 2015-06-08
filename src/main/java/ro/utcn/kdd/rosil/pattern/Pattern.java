@@ -1,4 +1,4 @@
-package ro.utcn.kdd.rosil.data;
+package ro.utcn.kdd.rosil.pattern;
 
 import java.util.List;
 

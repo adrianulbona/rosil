@@ -1,24 +1,23 @@
-package ro.utcn.kdd.rosil.data;
+package ro.utcn.kdd.rosil.match;
 
 import com.google.common.collect.Range;
-
-import static com.google.common.collect.Range.closedOpen;
+import ro.utcn.kdd.rosil.pattern.Pattern;
 
 public class MatchedPattern {
 
     public final Pattern pattern;
-    public final Integer startIndex;
-    public final Integer endIndex;
+    public final Type type;
 
-    public MatchedPattern(Pattern pattern, Integer startIndex, Integer endIndex) {
+    private final Range<Integer> range;
+
+    public MatchedPattern(Pattern pattern, Range<Integer> range, Type type) {
         this.pattern = pattern;
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
+        this.range = range;
+        this.type = type;
     }
 
     public boolean isExtendableAfterWith(MatchedPattern possibleExtension) {
         final Range<Integer> possibleExtensionRange = possibleExtension.getRange();
-        final Range<Integer> range = this.getRange();
         if (!range.isConnected(possibleExtensionRange)
                 || range.encloses(possibleExtensionRange)
                 || possibleExtensionRange.encloses(range)) {
@@ -33,7 +32,7 @@ public class MatchedPattern {
     }
 
     private boolean hasSplitPointAt(int possibleSplitPoint) {
-        int splitPoint = this.getRange().lowerEndpoint();
+        int splitPoint = this.range.lowerEndpoint();
         for (String element : this.pattern.elements) {
             if (splitPoint == possibleSplitPoint) {
                 return true;
@@ -46,11 +45,15 @@ public class MatchedPattern {
     }
 
     public Range<Integer> getRange() {
-        return closedOpen(this.startIndex, this.endIndex);
+        return this.range;
     }
 
     @Override
     public String toString() {
-        return pattern + "->" + getRange();
+        return pattern + "->" + this.range;
+    }
+
+    public enum Type {
+        BEGIN, INTERMEDIARY, COMPLETE, END
     }
 }

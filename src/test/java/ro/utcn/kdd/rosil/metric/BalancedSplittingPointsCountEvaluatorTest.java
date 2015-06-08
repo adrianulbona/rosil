@@ -2,7 +2,7 @@ package ro.utcn.kdd.rosil.metric;
 
 import org.junit.Before;
 import org.junit.Test;
-import ro.utcn.kdd.rosil.data.Word;
+import ro.utcn.kdd.rosil.io.Word;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;

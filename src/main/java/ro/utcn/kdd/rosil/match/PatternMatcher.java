@@ -1,6 +1,4 @@
-package ro.utcn.kdd.rosil.predict;
-
-import ro.utcn.kdd.rosil.data.MatchedPattern;
+package ro.utcn.kdd.rosil.match;
 
 import java.util.List;
 

@@ -7,15 +7,14 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.utcn.kdd.rosil.predict.PatternNode;
-import ro.utcn.kdd.rosil.predict.PatternNodeType;
+import ro.utcn.kdd.rosil.match.MatchedPattern;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PatternGraphViewer<V extends PatternNode, E> {
+public class PatternGraphViewer<V extends MatchedPattern, E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternGraphViewer.class);
 
     public void showGraphAndWait(DirectedGraph<V, E> patternGraph) {
@@ -46,10 +45,10 @@ public class PatternGraphViewer<V extends PatternNode, E> {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setSize(800, 600);
         final JGraphXAdapter<V, E> adapter = createAdapter(patternGraph);
-        patternGraph.vertexSet().stream().filter(node -> node.type == PatternNodeType.START).forEach(node -> {
+        patternGraph.vertexSet().stream().filter(node -> node.type == MatchedPattern.Type.BEGIN).forEach(node -> {
             adapter.setCellStyles(mxConstants.STYLE_FILLCOLOR, "A9A9A9", new Object[]{adapter.getVertexToCellMap().get(node)});
         });
-        patternGraph.vertexSet().stream().filter(node -> node.type == PatternNodeType.STOP).forEach(node -> {
+        patternGraph.vertexSet().stream().filter(node -> node.type == MatchedPattern.Type.END).forEach(node -> {
             adapter.setCellStyles(mxConstants.STYLE_FILLCOLOR, "FF7F50", new Object[]{adapter.getVertexToCellMap().get(node)});
         });
         final mxGraphComponent graphComponent = new mxGraphComponent(adapter);

@@ -1,7 +1,7 @@
 package ro.utcn.kdd.rosil.metric;
 
 import com.google.common.collect.Sets;
-import ro.utcn.kdd.rosil.data.Word;
+import ro.utcn.kdd.rosil.io.Word;
 
 import java.util.Set;
 

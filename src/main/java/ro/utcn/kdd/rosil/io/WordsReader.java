@@ -1,7 +1,6 @@
 package ro.utcn.kdd.rosil.io;
 
 import com.google.common.base.Charsets;
-import ro.utcn.kdd.rosil.data.Word;
 
 import java.io.BufferedReader;
 import java.io.IOException;
