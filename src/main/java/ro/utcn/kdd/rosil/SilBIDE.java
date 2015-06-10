@@ -1,23 +1,23 @@
 package ro.utcn.kdd.rosil;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ro.utcn.kdd.rosil.io.Word;
+import ro.utcn.kdd.rosil.io.WordsReader;
 import ro.utcn.kdd.rosil.match.MatchedPattern;
 import ro.utcn.kdd.rosil.match.PatternMatcher;
 import ro.utcn.kdd.rosil.match.PatternMatcherImpl;
+import ro.utcn.kdd.rosil.metric.BalancedSplittingPointsCountEvaluator;
 import ro.utcn.kdd.rosil.pattern.Pattern;
 import ro.utcn.kdd.rosil.pattern.PatternFinder;
-import ro.utcn.kdd.rosil.predict.IsolatedIntermediaryNodesCleaner;
-import ro.utcn.kdd.rosil.predict.MatchedPatternChain;
-import ro.utcn.kdd.rosil.predict.MatchedPatternChainFinder;
-import ro.utcn.kdd.rosil.predict.PatternGraphBuilder;
+import ro.utcn.kdd.rosil.predict.*;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
 
+import static java.lang.String.format;
 import static java.nio.file.Paths.get;
 
 public class SilBIDE {
@@ -26,9 +26,27 @@ public class SilBIDE {
 	public static void main(String[] args) throws Exception {
 		final int minSupport = 5;
 		final Path wordsPath = get("data/words_all.txt");
+		final List<Word> words = new WordsReader().read(wordsPath);
 		final List<Pattern> patterns = new PatternFinder().find(minSupport, wordsPath);
 
+		final Random randomGenerator = new Random(0);
+		for (int i = 0; i < 200; i++) {
+			final Word someWord = words.get(randomGenerator.nextInt(words.size() - 1));
+			final Word prediction = split(patterns, someWord.toString());
+			if (prediction != null) {
+				final BalancedSplittingPointsCountEvaluator evaluator = new BalancedSplittingPointsCountEvaluator();
+				final double evaluationResult = evaluator.evaluate(someWord, prediction);
+				LOGGER.info(format("[%s, %s]->%f", someWord.toSyllabifiedString(), prediction.toSyllabifiedString(),
+						evaluationResult));
+			}
+			else {
+				LOGGER.info(format("[%s, %s]->%f", someWord.toSyllabifiedString(), "(unable to split)", 0.0));
+			}
+		}
+		//splitSomeWords(patterns);
+	}
 
+	private static void splitSomeWords(List<Pattern> patterns) {
 		showPatternGraph(patterns, "libelula");
 		showPatternGraph(patterns, "soare");
 		showPatternGraph(patterns, "graunte");
@@ -49,10 +67,9 @@ public class SilBIDE {
 		showPatternGraph(patterns, "împărat");
 		showPatternGraph(patterns, "gunoier");
 		showPatternGraph(patterns, "moșneag");
-
 	}
 
-	private static void showPatternGraph(List<Pattern> patterns, String word) {
+	private static Word showPatternGraph(List<Pattern> patterns, String word) {
 		final PatternMatcher matcher = new PatternMatcherImpl(patterns);
 		final PatternGraphBuilder patternGraphBuilder = new PatternGraphBuilder();
 		final List<MatchedPattern> matchedPatterns = matcher.match(word);
@@ -62,16 +79,20 @@ public class SilBIDE {
 				new IsolatedIntermediaryNodesCleaner().transform(patternGraph);
 		//new PatternGraphViewer().showGraphAndWait(patternGraph);
 		final List<MatchedPatternChain> chains = new MatchedPatternChainFinder().allFor(cleanedGraph);
-		final Multimap<String, MatchedPatternChain> counts = aggregatePaths(chains);
-		//System.out.println(counts);
-		counts.keySet().forEach(splitting -> System.out.println(splitting + " -> " + counts.get(splitting).size()));
-	}
-
-	private static Multimap<String, MatchedPatternChain> aggregatePaths(List<MatchedPatternChain> chains) {
-		final Multimap<String, MatchedPatternChain> aggregated = HashMultimap.create();
-		chains.forEach(path -> aggregated.put(path.toSplitWord(), path));
-		return aggregated;
+		final MatchedPatternChain best = new SplittingPredictor(chains).best();
+		return best != null ? best.toWord() : null;
 	}
 
 
+	private static Word split(List<Pattern> patterns, String word) {
+		final PatternMatcher matcher = new PatternMatcherImpl(patterns);
+		final PatternGraphBuilder patternGraphBuilder = new PatternGraphBuilder();
+		final List<MatchedPattern> matchedPatterns = matcher.match(word);
+		final DirectedGraph<MatchedPattern, String> patternGraph = patternGraphBuilder.build(matchedPatterns);
+		final DirectedGraph<MatchedPattern, String> cleanedGraph =
+				new IsolatedIntermediaryNodesCleaner().transform(patternGraph);
+		final List<MatchedPatternChain> chains = new MatchedPatternChainFinder().allFor(cleanedGraph);
+		final MatchedPatternChain best = new SplittingPredictor(chains).best();
+		return best != null ? best.toWord() : null;
+	}
 }
