@@ -39,9 +39,9 @@ public class SilBIDE {
 		final Path trainingData = get("data/s50/s50_0_words_all.txt");
 		final Path testData = get("data/s50/s50_1_words_all.txt");
 		final List<Pattern> patterns = new PatternFinder().find(minSupport, trainingData);
-		//splitSomeWords(patterns);
+		splitSomeWords(patterns);
 		//test(testData, 10000, patterns, new PathOverlappingBasedSplittingPredictor());
-		longEvaluation();
+		//longEvaluation();
 	}
 
 
@@ -94,7 +94,7 @@ public class SilBIDE {
 		final List<Word> words = new WordsReader().read(source);
 		final Random randomGenerator = new Random(0);
 		return create(closedOpen(0, howMany), integers()).stream()
-				.map(x -> words.get(randomGenerator.nextInt(words.size())))
+				.map(unused -> words.get(randomGenerator.nextInt(words.size())))
 				.collect(Collectors.toCollection(LinkedList::new));
 	}
 
