@@ -2,4 +2,4 @@
 build/
 *.iml
 .idea/
-data/*.json
+data
