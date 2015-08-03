@@ -16,8 +16,11 @@ public class WordsReader {
         final List<Word> words = new ArrayList<>();
         try (final BufferedReader reader = Files.newBufferedReader(path, Charsets.UTF_8)) {
             for (String line; (line = reader.readLine()) != null; ) {
-                final List<String> syllables = Arrays.asList(line.split("\\s")[0].split("-"));
-                words.add(new Word(syllables));
+                final String[] splitByWhitespace = line.split("\\s");
+                if (splitByWhitespace.length == 1) {
+                    final List<String> syllables = Arrays.asList(splitByWhitespace[0].split("-"));
+                    words.add(new Word(syllables));
+                }
             }
         }
         return words;
