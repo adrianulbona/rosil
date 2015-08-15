@@ -1,8 +1,9 @@
 package ro.utcn.kdd.rosil.predict;
 
 import org.junit.Test;
-import ro.utcn.kdd.rosil.match.MatchedPattern;
+import ro.utcn.kdd.rosil.predict.match.MatchedPattern;
 import ro.utcn.kdd.rosil.pattern.Pattern;
+import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChain;
 
 import java.util.Arrays;
 

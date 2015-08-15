@@ -1,7 +1,7 @@
 package ro.utcn.kdd.rosil.data;
 
 import org.junit.Test;
-import ro.utcn.kdd.rosil.match.MatchedPattern;
+import ro.utcn.kdd.rosil.predict.match.MatchedPattern;
 import ro.utcn.kdd.rosil.pattern.Pattern;
 
 import java.util.Arrays;

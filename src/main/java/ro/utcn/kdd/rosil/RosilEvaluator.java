@@ -7,15 +7,20 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.utcn.kdd.rosil.io.Word;
-import ro.utcn.kdd.rosil.io.WordsReader;
-import ro.utcn.kdd.rosil.match.MatchedPattern;
-import ro.utcn.kdd.rosil.match.PatternMatcher;
-import ro.utcn.kdd.rosil.match.PatternMatcherImpl;
-import ro.utcn.kdd.rosil.metric.BalancedSplittingPointsCountEvaluator;
+import ro.utcn.kdd.rosil.input.Word;
+import ro.utcn.kdd.rosil.input.WordsReader;
+import ro.utcn.kdd.rosil.predict.match.MatchedPattern;
+import ro.utcn.kdd.rosil.predict.match.PatternMatcher;
+import ro.utcn.kdd.rosil.predict.match.PatternMatcherImpl;
+import ro.utcn.kdd.rosil.eval.metric.BalancedSplittingPointsCountEvaluator;
 import ro.utcn.kdd.rosil.pattern.Pattern;
 import ro.utcn.kdd.rosil.pattern.PatternFinder;
-import ro.utcn.kdd.rosil.predict.*;
+import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChain;
+import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChainFinder;
+import ro.utcn.kdd.rosil.predict.graph.PatternGraphBuilder;
+import ro.utcn.kdd.rosil.predict.graph.IsolatedIntermediaryNodesCleaner;
+import ro.utcn.kdd.rosil.predict.strategy.PathLengthBasedSplittingStrategy;
+import ro.utcn.kdd.rosil.predict.strategy.SplittingStrategy;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,15 +43,15 @@ public class RosilEvaluator {
     }
 
     private void run() throws IOException {
-        final Path trainingData = get("data/s50/s50_0_words_no_struct.csv");
-        final Path testData = get("data/s50/s50_1_words_no_struct.csv");
+        final Path trainingData = get("data/english/s50_0_data.txt");
+        final Path testData = get("data/english/s50_0_data.txt");
         final List<Word> testWords = extractSomeWords(testData, 10000);
-        final List<Pattern> patterns = new PatternFinder().find(5, trainingData);
-        evaluate(testWords, patterns, new PathLengthBasedSplittingPredictor());
+        final List<Pattern> patterns = new PatternFinder().find(2, trainingData);
+        evaluate(testWords, patterns, new PathLengthBasedSplittingStrategy());
     }
 
 
-    private void evaluate(List<Word> testWords, List<Pattern> patterns, SplittingPredictor predictor)
+    private void evaluate(List<Word> testWords, List<Pattern> patterns, SplittingStrategy predictor)
             throws IOException {
         final Multimap<Double, Pair<Word, Word>> evaluations = Multimaps.synchronizedMultimap(HashMultimap.create());
         final AtomicInteger evaluatedCount = new AtomicInteger(0);
@@ -86,7 +91,7 @@ public class RosilEvaluator {
     }
 
 
-    private Word split(List<Pattern> patterns, String word, SplittingPredictor predictor) {
+    private Word split(List<Pattern> patterns, String word, SplittingStrategy predictor) {
         final PatternMatcher matcher = new PatternMatcherImpl(patterns);
         final PatternGraphBuilder patternGraphBuilder = new PatternGraphBuilder();
         final List<MatchedPattern> matchedPatterns = matcher.match(word);

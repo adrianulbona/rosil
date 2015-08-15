@@ -11,8 +11,8 @@ import jp.ac.titech.cs.se.sparesort.SequenceDatabase;
 import jp.ac.titech.cs.se.sparesort.bide.ConcurrentBIDE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.utcn.kdd.rosil.io.Word;
-import ro.utcn.kdd.rosil.io.WordsReader;
+import ro.utcn.kdd.rosil.input.Word;
+import ro.utcn.kdd.rosil.input.WordsReader;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

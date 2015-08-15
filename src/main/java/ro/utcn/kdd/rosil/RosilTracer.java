@@ -3,13 +3,19 @@ package ro.utcn.kdd.rosil;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.utcn.kdd.rosil.io.PatternGraphViewer;
-import ro.utcn.kdd.rosil.match.MatchedPattern;
-import ro.utcn.kdd.rosil.match.PatternMatcher;
-import ro.utcn.kdd.rosil.match.PatternMatcherImpl;
+import ro.utcn.kdd.rosil.eval.PatternGraphViewer;
+import ro.utcn.kdd.rosil.predict.match.MatchedPattern;
+import ro.utcn.kdd.rosil.predict.match.PatternMatcher;
+import ro.utcn.kdd.rosil.predict.match.PatternMatcherImpl;
 import ro.utcn.kdd.rosil.pattern.Pattern;
 import ro.utcn.kdd.rosil.pattern.PatternFinder;
-import ro.utcn.kdd.rosil.predict.*;
+import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChain;
+import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChainFinder;
+import ro.utcn.kdd.rosil.predict.graph.PatternGraphBuilder;
+import ro.utcn.kdd.rosil.predict.graph.IsolatedIntermediaryNodesCleaner;
+import ro.utcn.kdd.rosil.predict.strategy.PathCountBasedSplittingStrategy;
+import ro.utcn.kdd.rosil.predict.strategy.PathLengthBasedSplittingStrategy;
+import ro.utcn.kdd.rosil.predict.strategy.PathOverlappingBasedSplittingStrategy;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -61,15 +67,15 @@ public class RosilTracer {
                 new IsolatedIntermediaryNodesCleaner().transform(patternGraph);
         new PatternGraphViewer().showGraphAndWait(cleanedGraph);
         final List<MatchedPatternChain> chains = new MatchedPatternChainFinder().allFor(cleanedGraph);
-        final MatchedPatternChain bestPathCount = new PathCountBasedSplittingPredictor().best(chains);
+        final MatchedPatternChain bestPathCount = new PathCountBasedSplittingStrategy().best(chains);
         if (bestPathCount != null) {
             LOGGER.info("count: " + bestPathCount.toWord().toSyllabifiedString());
         }
-        final MatchedPatternChain bestPathLength = new PathLengthBasedSplittingPredictor().best(chains);
+        final MatchedPatternChain bestPathLength = new PathLengthBasedSplittingStrategy().best(chains);
         if (bestPathLength != null) {
             LOGGER.info("length: " + bestPathLength.toWord().toSyllabifiedString());
         }
-        final MatchedPatternChain bestOverlapping = new PathOverlappingBasedSplittingPredictor().best(chains);
+        final MatchedPatternChain bestOverlapping = new PathOverlappingBasedSplittingStrategy().best(chains);
         if (bestOverlapping != null) {
             LOGGER.info("overlapping: " + bestOverlapping.toWord().toSyllabifiedString());
         }
