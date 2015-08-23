@@ -1,4 +1,4 @@
-package ro.utcn.kdd.rosil.data;
+package ro.utcn.kdd.rosil.predict;
 
 import org.junit.Test;
 import ro.utcn.kdd.rosil.predict.match.MatchedPattern;
