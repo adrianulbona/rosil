@@ -1,5 +1,10 @@
+apply plugin: 'application'
 apply plugin: 'java'
 
+mainClassName = 'ro.utcn.kdd.rosil.RosilTracer'
+run {
+    args System.getProperty("word")
+}
 sourceCompatibility = 1.8
 version = '1.0'
 

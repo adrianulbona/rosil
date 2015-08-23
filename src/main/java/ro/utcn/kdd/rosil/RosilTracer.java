@@ -28,11 +28,13 @@ public class RosilTracer {
     public static void main(String[] args) {
         final int minSupport = 100;
         final Path trainingData = get("data/s50/s50_0_words_no_struct.csv");
-        final Path testData = get("data/s50/s50_1_words_all.txt");
         final List<Pattern> patterns = new PatternFinder().find(minSupport, trainingData);
-        splitSomeWords(patterns);
+        if (args.length == 0) {
+            splitSomeWords(patterns);
+        } else {
+            showPatternGraph(patterns, args[0]);
+        }
     }
-
 
     private static void splitSomeWords(List<Pattern> patterns) {
         showPatternGraph(patterns, "vocabular");
