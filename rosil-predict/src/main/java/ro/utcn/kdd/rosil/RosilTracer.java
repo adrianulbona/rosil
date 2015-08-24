@@ -24,42 +24,54 @@ import static java.nio.file.Paths.get;
 
 public class RosilTracer {
     private static final Logger LOGGER = LoggerFactory.getLogger(RosilTracer.class);
+    private List<Pattern> patterns;
+
+    public RosilTracer() {
+        cachePatterns();
+    }
 
     public static void main(String[] args) {
-        final int minSupport = 100;
-        final Path trainingData = get("data/s50/s50_0_words_no_struct.csv");
-        final List<Pattern> patterns = new PatternFinder().find(minSupport, trainingData);
+        RosilTracer tracer = new RosilTracer();
         if (args.length == 0) {
-            splitSomeWords(patterns);
+            tracer.splitSomeWords();
         } else {
-            showPatternGraph(patterns, args[0]);
+            tracer.splitWord(args[0], true);
         }
     }
 
-    private static void splitSomeWords(List<Pattern> patterns) {
-        showPatternGraph(patterns, "vocabular");
-        showPatternGraph(patterns, "informatica");
-        showPatternGraph(patterns, "împărat");
-        showPatternGraph(patterns, "soare");
-        showPatternGraph(patterns, "graunte");
-        showPatternGraph(patterns, "curcubete");
-        showPatternGraph(patterns, "genealogie");
-        showPatternGraph(patterns, "programator");
-        showPatternGraph(patterns, "camaraderie");
-        showPatternGraph(patterns, "copilandru");
-        showPatternGraph(patterns, "basculanta");
-        showPatternGraph(patterns, "locomotiva");
-        showPatternGraph(patterns, "epilepsie");
-        showPatternGraph(patterns, "aglutinare");
-        showPatternGraph(patterns, "usturoi");
-        showPatternGraph(patterns, "gunoier");
-        showPatternGraph(patterns, "moșneag");
-        showPatternGraph(patterns, "castravete");
-        showPatternGraph(patterns, "firav");
-
+    private void cachePatterns() {
+        final int minSupport = 10;
+        final Path trainingData = get("../data/s50/s50_0_words_no_struct.csv");
+        this.patterns = new PatternFinder().find(minSupport, trainingData);
     }
 
-    private static void showPatternGraph(List<Pattern> patterns, String word) {
+    private void splitSomeWords() {
+        splitWord("vocabular", true);
+        splitWord("informatica", true);
+        splitWord("împărat", true);
+        splitWord("soare", true);
+        splitWord("graunte", true);
+        splitWord("curcubete", true);
+        splitWord("genealogie", true);
+        splitWord("programator", true);
+        splitWord("camaraderie", true);
+        splitWord("copilandru", true);
+        splitWord("basculanta", true);
+        splitWord("locomotiva", true);
+        splitWord("epilepsie", true);
+        splitWord("aglutinare", true);
+        splitWord("usturoi", true);
+        splitWord("gunoier", true);
+        splitWord("moșneag", true);
+        splitWord("castravete", true);
+        splitWord("firav", true);
+    }
+
+    public RosilSolutions splitWord(String word) {
+        return splitWord(word, false);
+    }
+
+    private RosilSolutions splitWord(String word, boolean showGraph) {
         final PatternMatcher matcher = new PatternMatcherImpl(patterns);
         final PatternGraphBuilder patternGraphBuilder = new PatternGraphBuilder();
         final List<MatchedPattern> matchedPatterns = matcher.match(word);
@@ -67,19 +79,24 @@ public class RosilTracer {
         //new PatternGraphViewer().showGraphAndWait(patternGraph);
         final DirectedGraph<MatchedPattern, String> cleanedGraph =
                 new IsolatedIntermediaryNodesCleaner().transform(patternGraph);
-        new PatternGraphViewer().showGraphAndWait(cleanedGraph);
+        if (showGraph) {
+            new PatternGraphViewer().showGraphAndWait(cleanedGraph);
+        }
         final List<MatchedPatternChain> chains = new MatchedPatternChainFinder().allFor(cleanedGraph);
+
         final MatchedPatternChain bestPathCount = new PathCountBasedSplittingStrategy().best(chains);
-        if (bestPathCount != null) {
-            LOGGER.info("count: " + bestPathCount.toWord().toSyllabifiedString());
-        }
         final MatchedPatternChain bestPathLength = new PathLengthBasedSplittingStrategy().best(chains);
-        if (bestPathLength != null) {
-            LOGGER.info("length: " + bestPathLength.toWord().toSyllabifiedString());
-        }
         final MatchedPatternChain bestOverlapping = new PathOverlappingBasedSplittingStrategy().best(chains);
-        if (bestOverlapping != null) {
-            LOGGER.info("overlapping: " + bestOverlapping.toWord().toSyllabifiedString());
+
+        if (bestPathLength != null && bestOverlapping != null && bestPathCount != null) {
+            final String overlapping = bestOverlapping.toWord().toSyllabifiedString();
+            final String counting = bestPathCount.toWord().toSyllabifiedString();
+            final String shortest = bestPathLength.toWord().toSyllabifiedString();
+            LOGGER.info("count: " + counting);
+            LOGGER.info("length: " + shortest);
+            LOGGER.info("overlapping: " + overlapping);
+            return new RosilSolutions(shortest, overlapping, counting);
         }
+        return null;
     }
 }

@@ -1,28 +1,17 @@
-apply plugin: 'application'
-apply plugin: 'java'
 
-mainClassName = 'ro.utcn.kdd.rosil.RosilTracer'
-run {
-    args System.getProperty("word")
-}
-sourceCompatibility = 1.8
-version = '1.0'
-
-repositories {
-    mavenLocal()
-    mavenCentral()
+allprojects{
+	group = 'ro.utcn.kdd'
+	version = '1.0'
 }
 
-dependencies {
-    compile 'com.google.guava:guava:18.0'
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'com.google.code.gson:gson:1.7.2'
-    compile 'org.jgrapht:jgrapht-dist:0.9.1'
-    compile 'jp.ac.titech.cs.se:sparesort:0.2.0'
-    compile 'org.apache.logging.log4j:log4j-core:2.3'
-    testCompile 'junit:junit:4.12'
+subprojects {
+	apply plugin: 'java'
+    apply plugin: 'application'
+    sourceCompatibility = 1.8
+
+	repositories {
+        mavenLocal();
+		mavenCentral()
+	}
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
-}
