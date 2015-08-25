@@ -1,10 +1,12 @@
 package ro.utcn.kdd.rosil.input;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static java.nio.file.Paths.get;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class LineBasedSplitterTest {
 
     @Test

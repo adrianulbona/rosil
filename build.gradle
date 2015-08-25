@@ -10,8 +10,11 @@ subprojects {
     sourceCompatibility = 1.8
 
 	repositories {
-        mavenLocal();
 		mavenCentral()
+	}
+
+	dependencies {
+		testCompile 'junit:junit:4.12'
 	}
 }
 
