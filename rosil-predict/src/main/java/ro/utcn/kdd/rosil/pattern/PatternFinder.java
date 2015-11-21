@@ -38,7 +38,7 @@ public class PatternFinder {
     public List<Pattern> find(int minSupport, Path wordsPath) {
         final Path cachedPatternsPath = get(format(CACHED_PATTERNS_FILE_NAME_FORMAT, minSupport));
         final Path patternsPath = wordsPath.getParent().resolve(cachedPatternsPath);
-        if (!Files.exists(patternsPath)) {
+        if (true) {
             try {
                 computeAndCachePatterns(minSupport, wordsPath, patternsPath);
             } catch (IOException e) {

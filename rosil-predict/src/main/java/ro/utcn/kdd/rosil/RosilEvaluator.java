@@ -19,7 +19,9 @@ import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChain;
 import ro.utcn.kdd.rosil.predict.chain.MatchedPatternChainFinder;
 import ro.utcn.kdd.rosil.predict.graph.PatternGraphBuilder;
 import ro.utcn.kdd.rosil.predict.graph.IsolatedIntermediaryNodesCleaner;
+import ro.utcn.kdd.rosil.predict.strategy.PathCountBasedSplittingStrategy;
 import ro.utcn.kdd.rosil.predict.strategy.PathLengthBasedSplittingStrategy;
+import ro.utcn.kdd.rosil.predict.strategy.PathOverlappingBasedSplittingStrategy;
 import ro.utcn.kdd.rosil.predict.strategy.SplittingStrategy;
 
 import java.io.IOException;
@@ -43,11 +45,31 @@ public class RosilEvaluator {
     }
 
     private void run() throws IOException {
-        final Path trainingData = get("data/english/s50_0_data.txt");
-        final Path testData = get("data/english/s50_0_data.txt");
-        final List<Word> testWords = extractSomeWords(testData, 10000);
-        final List<Pattern> patterns = new PatternFinder().find(2, trainingData);
-        evaluate(testWords, patterns, new PathLengthBasedSplittingStrategy());
+        final Path trainingData = get("data/english_complete/train.txt");
+        final Path testData = get("data/english_complete/test.txt");
+        final List<Word> testWords = extractSomeWords(testData, 5000);
+        //evaluateSupportInfluence(trainingData, testWords, new PathLengthBasedSplittingStrategy());
+        //evaluateSupportInfluence(trainingData, testWords, new PathCountBasedSplittingStrategy());
+        evaluateSupportInfluence(trainingData, testWords, new PathOverlappingBasedSplittingStrategy());
+    }
+
+    private void evaluateSupportInfluence(Path trainingData, List<Word> testWords, SplittingStrategy predictor) throws IOException {
+        for (int i = 50; i > 0; i -= 5) {
+            evaluateWithSupport(trainingData, testWords, predictor, i);
+        }
+        evaluateWithSupport(trainingData, testWords, predictor, 2);
+    }
+
+    private void evaluateWithSupport(Path trainingData, List<Word> testWords, SplittingStrategy predictor, int i) throws IOException {
+        LOGGER.info(predictor.getClass().getSimpleName() + "(sup = " + i + ")");
+        long startTime = System.currentTimeMillis();
+        for (int j = 0; j < 4; j++) {
+            final List<Pattern> patterns = new PatternFinder().find(i, trainingData);
+        }
+        LOGGER.info(String.format("Done in %ss", (System.currentTimeMillis() - startTime) / (1000.0 * 4)));
+/*        for (int j = 0; j < 5; j++) {
+            evaluate(testWords, patterns, predictor);
+        }*/
     }
 
 
@@ -61,25 +83,29 @@ public class RosilEvaluator {
                 final BalancedSplittingPointsCountEvaluator evaluator = new BalancedSplittingPointsCountEvaluator();
                 final double evaluationResult = evaluator.evaluate(someWord, prediction);
                 evaluations.put(evaluationResult, Pair.of(someWord, prediction));
+/*
                 LOGGER.trace(format("[%s, %s]->%f", someWord.toSyllabifiedString(), prediction.toSyllabifiedString(),
                         evaluationResult));
                 final int currentCount = evaluatedCount.incrementAndGet();
                 if (currentCount % (testWords.size() / 100) == 0) {
                     LOGGER.info(format("evaluated %s words.", currentCount));
                 }
+*/
             } else {
-                LOGGER.info(format("[%s, %s]->%f", someWord.toSyllabifiedString(), "(unable to split)", 0.0));
+//                LOGGER.info(format("[%s, %s]->%f", someWord.toSyllabifiedString(), "(unable to split)", 0.0));
             }
         });
         final int numberOfEvaluations = evaluations.size();
+/*
         evaluations.keySet().stream().sorted().forEach(result -> {
             final int countForResult = evaluations.get(result).size();
             LOGGER.info(format("%.3f -> %4d (%.2f%%)", result, countForResult,
                     (double) countForResult / numberOfEvaluations * 100));
         });
+*/
         final Double sum = evaluations.entries().stream().map(Map.Entry::getKey).reduce((r1, r2) -> r1 + r2).get();
-        LOGGER.info(format("avg = %s", sum / numberOfEvaluations));
-        LOGGER.info(format("unsplitted = %s", testWords.size() - numberOfEvaluations));
+/*        LOGGER.info(format("avg = %s", sum / numberOfEvaluations));
+        LOGGER.info(format("unsplitted = %s", testWords.size() - numberOfEvaluations));*/
     }
 
     private List<Word> extractSomeWords(Path source, int howMany) throws IOException {
